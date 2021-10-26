@@ -1,4 +1,4 @@
-// import
+// importt
 const express = require('express');
 const router = require('./api/product/routes');
 const connectDB = require('./db/database');
