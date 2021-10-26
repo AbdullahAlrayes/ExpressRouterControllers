@@ -1,28 +1,54 @@
-const products = require('../../products');
+const Product = require('../../db/models/Product');
 
-exports.getProducts = (req, res) => {
-  return res.json(data);
+exports.getProducts = async (req, res) => {
+  const list = await Product.find();
+  return res.json(list);
 };
 
-exports.createProduct = (req, res) => {
-  const body = req.body;
-  res.statusCode = 201;
-  return res.json(body);
+exports.createProduct = async (req, res) => {
+  try {
+    const newProduct = await Product.create(req.body);
+    res.statusCode = 201;
+    return res.json(newProduct);
+  } catch (error) {
+    console.log(error);
+    res.statusCode = 500;
+    return res.json().end();
+  }
 };
 
-exports.deleteProduct = (req, res) => {
-  const id = +req.params.productId;
-  const isExist = data.find((item) => item.id === id);
-  if (isExist) {
-    res.statusCode = 204;
-    const updatedData = data.filter(
-      (item) => item.id !== +req.params.productId
-    );
-    res.json(updatedData);
-  } else {
+exports.updateProduct = async (req, res) => {
+  try {
+    const id = req.params.productId;
+    const product = Product.findById(id);
+    if (product) {
+      const updatedRecord = await Product.findOneAndUpdate(
+        { id: id },
+        req.body
+      );
+      res.statusCode = 200;
+      return res.json(updatedRecord);
+    }
+  } catch (error) {
+    console.log(error);
+    res.statusCode = 500;
+    return res.json().end();
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (product) {
+      await product.remove();
+      res.statusCode = 200;
+      return res.json().end();
+    }
     res.statusCode = 404;
-    res.json({
-      message: 'item not exisit',
-    });
+    return res.json({ message: 'No Item Found' });
+  } catch (error) {
+    console.log(error);
+    res.statusCode = 500;
+    return res.json().end();
   }
 };
